@@ -95,16 +95,16 @@ const initials = computed(() => {
             v-for="t in visibleTabs"
             :key="t.to"
             :to="t.to"
-            class="relative inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md whitespace-nowrap transition-colors"
+            class="relative inline-flex items-center gap-2 px-3 py-2 text-sm whitespace-nowrap transition-all"
             :class="isActive(t)
-              ? 'text-foreground'
-              : 'text-muted-foreground hover:text-foreground hover:bg-accent'"
+              ? 'text-primary font-semibold bg-primary/8 rounded-md'
+              : 'text-muted-foreground font-medium hover:text-foreground hover:bg-accent rounded-md'"
           >
-            <component :is="t.icon" class="size-4 shrink-0" />
+            <component :is="t.icon" class="size-4 shrink-0" :class="isActive(t) ? 'text-primary' : ''" />
             {{ t.label }}
             <span
               v-if="isActive(t)"
-              class="absolute inset-x-2 -bottom-1 h-0.5 bg-primary rounded-full"
+              class="absolute inset-x-3 -bottom-[7px] h-[3px] bg-primary rounded-t-full"
             />
           </NuxtLink>
         </nav>
