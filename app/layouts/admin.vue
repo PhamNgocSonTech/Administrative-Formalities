@@ -1,8 +1,15 @@
+<script setup lang="ts">
+import { Toaster } from '@/components/ui/sonner'
+import 'vue-sonner/style.css'
+</script>
+
 <template>
-  <div class="bg-surface text-on-surface antialiased h-screen overflow-hidden flex font-sans">
-    <AdminSideNav />
-    <main class="ml-64 flex-1 h-screen overflow-y-auto bg-background px-margin-desktop py-stack-lg">
+  <div class="min-h-screen bg-background text-foreground">
+    <AdminTopNav />
+    <main class="max-w-[1440px] mx-auto px-6 py-8">
       <slot />
     </main>
+    <Toaster rich-colors position="top-right" />
+    <AdminConfirmHost />
   </div>
 </template>

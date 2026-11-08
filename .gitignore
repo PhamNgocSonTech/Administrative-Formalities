@@ -23,3 +23,9 @@ logs
 .env.*
 !.env.example
 /administrative-formalities-17ff65e2433b.json
+
+# Thư mục tham khảo repo backend (clone riêng, không phải code Nuxt)
+tthc-tra-cuu-main/
+
+# Scratch venv Python (nếu lỡ tạo trong root Nuxt)
+.venv/
