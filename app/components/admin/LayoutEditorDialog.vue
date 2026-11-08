@@ -70,7 +70,7 @@ async function load() {
   }
 }
 
-watch(() => props.open, (v) => { if (v) load() })
+watch(() => props.open, (v) => { if (v) load() }, { immediate: true })
 
 function toggle(blockIndex: number, t: '1' | '2' | '3' | 'hl', shift: boolean) {
   const on = t === 'hl' ? !hlSet.value.has(blockIndex) : headsMap.value.get(blockIndex) !== Number(t)

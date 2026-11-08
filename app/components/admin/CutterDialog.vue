@@ -85,7 +85,7 @@ async function load() {
   }
 }
 
-watch(() => props.open, (v) => { if (v) load() })
+watch(() => props.open, (v) => { if (v) load() }, { immediate: true })
 
 const note = computed(() => {
   if (!data.value) return ''

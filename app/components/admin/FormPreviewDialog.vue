@@ -11,8 +11,8 @@ const html = ref('')
 const label = ref('')
 const errorMsg = ref('')
 
-watch(() => props.open, async (v) => {
-  if (!v || !props.formId) return
+async function loadPreview() {
+  if (!props.formId) return
   loading.value = true
   errorMsg.value = ''
   html.value = ''
@@ -25,7 +25,9 @@ watch(() => props.open, async (v) => {
   } finally {
     loading.value = false
   }
-})
+}
+
+watch(() => props.open, (v) => { if (v) loadPreview() }, { immediate: true })
 </script>
 
 <template>
