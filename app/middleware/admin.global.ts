@@ -1,14 +1,11 @@
 export default defineNuxtRouteMiddleware(async (to) => {
-    if (!to.path.startsWith('/admin') || to.path === '/admin/login') return
+  if (!to.path.startsWith('/admin') || to.path === '/admin/login') return
 
-    // Cache kết quả trong session để tránh gọi API mỗi lần navigate
-    const isAuth = useState('admin-auth', () => false)
-    if (isAuth.value) return
+  const { me, verify } = useAdminAuth()
+  if (me.value) return
 
-    try {
-        await $fetch('/api/admin/verify')
-        isAuth.value = true
-    } catch {
-        return navigateTo('/admin/login')
-    }
+  const ok = await verify()
+  if (!ok) {
+    return navigateTo({ path: '/admin/login', query: { next: to.fullPath } })
+  }
 })
