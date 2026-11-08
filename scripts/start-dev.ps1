@@ -55,11 +55,15 @@ if (Test-PortOpen $BackendPort) {
     Write-Host "[2/3] FastAPI backend already running on :$BackendPort" -ForegroundColor Green
 } else {
     Write-Host "[2/3] Starting FastAPI backend in a new terminal..." -ForegroundColor Yellow
+    # Pick available shell: prefer pwsh (PS7), fallback to powershell (5.1)
+    $shell = if (Get-Command pwsh.exe -ErrorAction SilentlyContinue) { "pwsh" } else { "powershell" }
+    $uvicornCmd = "python -m uvicorn app.main:create_app --factory --app-dir backend --host 127.0.0.1 --port $BackendPort"
+
     $wtAvailable = Get-Command wt.exe -ErrorAction SilentlyContinue
     if ($wtAvailable) {
-        wt -w 0 new-tab --title "FastAPI :$BackendPort" -d "$Backend" pwsh -NoExit -Command "python -m uvicorn app.main:create_app --factory --app-dir backend --host 127.0.0.1 --port $BackendPort"
+        wt -w 0 new-tab --title "FastAPI :$BackendPort" -d "$Backend" $shell -NoExit -Command $uvicornCmd
     } else {
-        Start-Process pwsh -ArgumentList "-NoExit", "-Command", "cd '$Backend'; python -m uvicorn app.main:create_app --factory --app-dir backend --host 127.0.0.1 --port $BackendPort"
+        Start-Process $shell -ArgumentList "-NoExit", "-Command", "cd '$Backend'; $uvicornCmd"
     }
 
     Write-Host "   Waiting for backend to be ready..." -ForegroundColor Gray
