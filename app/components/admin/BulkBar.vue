@@ -1,37 +1,34 @@
 <script setup lang="ts">
 /**
- * Thanh hành động hàng loạt xuất hiện khi user tick checkbox trong table.
- * Dùng Transition để expand/fade mượt, thay vì v-if đột ngột.
+ * Thanh hành động hàng loạt xuất hiện khi user tick checkbox.
+ * Dùng kỹ thuật grid-template-rows 0fr/1fr (giống shadcn Collapsible) — mượt với mọi chiều cao, không janky.
  */
 defineProps<{ show: boolean }>()
 </script>
 
 <template>
-  <Transition name="bulkbar">
-    <div v-if="show" class="bulkbar">
+  <div class="bulkbar" :data-state="show ? 'open' : 'closed'">
+    <div class="bulkbar-inner">
       <slot />
     </div>
-  </Transition>
+  </div>
 </template>
 
 <style scoped>
 .bulkbar {
-  overflow: hidden;
-}
-.bulkbar-enter-active,
-.bulkbar-leave-active {
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.bulkbar-enter-from,
-.bulkbar-leave-to {
+  display: grid;
+  grid-template-rows: 0fr;
   opacity: 0;
-  max-height: 0;
-  transform: translateY(-4px);
+  transition: grid-template-rows 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.2s ease;
+  will-change: grid-template-rows, opacity;
 }
-.bulkbar-enter-to,
-.bulkbar-leave-from {
+.bulkbar[data-state="open"] {
+  grid-template-rows: 1fr;
   opacity: 1;
-  max-height: 200px;
-  transform: translateY(0);
+}
+.bulkbar-inner {
+  overflow: hidden;
+  min-height: 0;
 }
 </style>
