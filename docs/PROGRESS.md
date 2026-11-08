@@ -127,10 +127,19 @@ Phase 2 (tính năng nâng cao):
 - **AiPanel**: chạy AI bóc tách với phạm vi (field / nhóm / toàn bộ), hiện status + lần chạy gần nhất
 - **AiViewerDialog**: trình đối chiếu side-by-side dùng `jsdiff.diffWordsWithSpace`, sidebar list items, accept/reject từng mục + bulk với confirm cảnh báo ghi đè thủ công / thiếu căn cứ, edit đề xuất trước khi accept
 
+Phase 3 (polish + UX đợt 2):
+- **WordViewer polish**: mini-map vệt màu field + viewport indicator, Ctrl+F search có badge n/M + prev/next, zoom 70-200% (lưu localStorage), block number badge hover
+- **"Xem bản dựng đẹp"**: DocxPreviewDialog lazy-load `docx-preview`, fetch DOCX với cookie, override writing-mode cho text luôn ngang
+- **Field filter / search cột trái**: lọc chưa có nguồn / biên tập thủ công / có cảnh báo, search theo tên, Mở/Thu tất cả, hiện X/N khi lọc
+- **Progress bar completeness**: X/11 trường có nguồn + % ở header
+- **Toggle "Tô màu vùng đã bóc tách"** ở WordViewer header (lưu localStorage)
+- **Sticky action bar** khi scroll xuống xa (Gửi duyệt / Duyệt / Trả lại + nút "Lên đầu")
+- **Dirty state warning**: khi đang edit textarea chưa save, chặn navigate với shadcn Dialog (ở lại / bỏ qua), + beforeunload cho F5/close tab
+- **Thanh cuộn mảnh + màu đồng bộ theme** (global, Firefox + webkit)
+- **Badge cảnh báo trên field header** nếu có warning ánh xạ theo code
+
 Còn thiếu:
 - **Layout editor** (dựng danh sách thả xuống từ đầu — chỉ hiển thị, chưa có editor)
-- **Polish WordViewer**: mini-map màu, Ctrl+F search, zoom, keyboard nav (xem mục 7 — roadmap)
-- **"Xem bản dựng đẹp"** modal với docx-preview (optional)
 
 ---
 
@@ -203,12 +212,14 @@ Còn thiếu:
 
 ## 8. Tổng quan commit đã có
 
-Branch `feature/admin-shadcn-fastapi`:
+Branch `feature/admin-shadcn-fastapi` (từ mới tới cũ):
 
 ```
-38458b0 feat(admin): các trang quản trị TTHC (list, import, quyết định, chi tiết phiên bản)
-90852f3 feat(admin): proxy /api → FastAPI backend + auth cookie 3 vai trò
-ab2b44e feat(admin): nền tảng shadcn-vue + Tailwind v4 cho giao diện quản trị
+feat(admin): polish WordViewer + xem bản dựng đẹp + UX đợt 2
+docs: thêm PROGRESS.md tóm tắt tiến độ dự án Nuxt admin
+feat(admin): các trang quản trị TTHC (list, import, quyết định, chi tiết phiên bản)
+feat(admin): proxy /api → FastAPI backend + auth cookie 3 vai trò
+feat(admin): nền tảng shadcn-vue + Tailwind v4 cho giao diện quản trị
 ```
 
 Chưa push lên remote. Push khi sẵn sàng:

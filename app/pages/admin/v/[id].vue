@@ -53,6 +53,13 @@ import {
   Scissors,
   Plus,
   FileType,
+  Search,
+  Filter,
+  Palette,
+  ChevronsUpDown,
+  CircleCheckBig,
+  ChevronsDown,
+  ChevronsUp,
 } from 'lucide-vue-next'
 
 definePageMeta({ layout: 'admin' })
@@ -614,6 +621,114 @@ function openFormPreview(f: FormRow) {
   formPreviewOpen.value = true
 }
 
+// --- Sticky action bar khi scroll xuống xa khỏi header ---
+const showStickyActions = ref(false)
+function onScroll() {
+  showStickyActions.value = window.scrollY > 400
+}
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+if (import.meta.client) {
+  useEventListener(window, 'scroll', onScroll, { passive: true })
+}
+
+// --- Field filter + search ---
+const fieldSearch = ref('')
+const fieldFilter = ref<'all' | 'no_source' | 'manual' | 'has_warning'>('all')
+
+const warningsByField = computed(() => {
+  // Backend chỉ trả warnings level toàn version, không gắn field — ở đây ước chừng theo code
+  // vd. code chứa tên field. Nếu không khớp, bỏ qua filter.
+  const map: Record<string, number> = {}
+  for (const w of v.value?.warnings ?? []) {
+    const code = (w.code || '').toLowerCase()
+    for (const k of Object.keys(v.value?.field_titles ?? {})) {
+      if (code.includes(k.toLowerCase())) map[k] = (map[k] || 0) + 1
+    }
+  }
+  return map
+})
+
+const filteredFieldKeys = computed(() => {
+  if (!v.value) return []
+  const keys = Object.keys(v.value.field_titles)
+  const q = fieldSearch.value.trim().toLowerCase()
+  return keys.filter((k) => {
+    const title = (v.value!.field_titles[k] || '').toLowerCase()
+    if (q && !title.includes(q) && !k.toLowerCase().includes(q)) return false
+    const f = v.value!.content.fields?.[k] ?? {}
+    if (fieldFilter.value === 'no_source' && f.source) return false
+    if (fieldFilter.value === 'manual' && f.source !== 'bien_tap_thu_cong') return false
+    if (fieldFilter.value === 'has_warning' && !warningsByField.value[k]) return false
+    return true
+  })
+})
+
+const completeness = computed(() => {
+  if (!v.value) return { done: 0, total: 0 }
+  const keys = Object.keys(v.value.field_titles)
+  const done = keys.filter((k) => !!v.value!.content.fields?.[k]?.source).length
+  return { done, total: keys.length }
+})
+
+function expandAll() {
+  openFields.value = new Set(filteredFieldKeys.value)
+}
+function collapseAll() {
+  openFields.value = new Set()
+}
+
+// --- Show/hide WordViewer colors ---
+const showHighlights = useLocalStorage('word-viewer:highlights', true)
+const effectiveWordFields = computed(() => showHighlights.value ? wordFields.value : {})
+const effectiveWordForms = computed(() => showHighlights.value ? formRanges.value : {})
+
+// --- Dirty state (chặn navigate khi textarea đang edit chưa save) ---
+const dirty = computed(() => editingKey.value !== null)
+
+if (import.meta.client) {
+  useEventListener(window, 'beforeunload', (e: BeforeUnloadEvent) => {
+    if (dirty.value) { e.preventDefault(); e.returnValue = '' }
+  })
+}
+
+const routerForLeave = useRouter()
+const leaveOpen = ref(false)
+const pendingTo = ref<string | null>(null)
+
+onMounted(() => {
+  const remove = routerForLeave.beforeEach((to, from, next) => {
+    if (from.path.startsWith('/admin/v/') && to.path !== from.path && dirty.value && !pendingTo.value) {
+      pendingTo.value = to.fullPath
+      leaveOpen.value = true
+      next(false)
+    } else {
+      next()
+    }
+  })
+  onBeforeUnmount(remove)
+})
+
+async function confirmLeave() {
+  const to = pendingTo.value
+  leaveOpen.value = false
+  pendingTo.value = null
+  editingKey.value = null
+  if (to) await routerForLeave.push(to)
+}
+function cancelLeave() {
+  leaveOpen.value = false
+  pendingTo.value = null
+}
+
+// --- Docx preview (Xem bản dựng đẹp) ---
+const docxPreviewOpen = ref(false)
+const docxPreviewUrl = computed(() =>
+  v.value?.source ? `/api/admin/source-documents/${v.value.source.id}/download` : null,
+)
+const docxPreviewFilename = computed(() => v.value?.source?.filename || '')
+
 // --- AI viewer ---
 const aiViewerOpen = ref(false)
 const aiViewerRunId = ref<number | null>(null)
@@ -718,6 +833,23 @@ function sourceVariant(s?: string): 'default' | 'secondary' | 'outline' {
           </AlertDescription>
         </Alert>
 
+        <!-- Progress completeness -->
+        <div class="pt-2 border-t">
+          <div class="flex items-center justify-between text-xs text-muted-foreground mb-1">
+            <span class="flex items-center gap-1.5">
+              <CircleCheckBig class="size-3.5 text-success" />
+              <strong class="text-foreground">{{ completeness.done }}</strong>/{{ completeness.total }} trường đã có nguồn
+            </span>
+            <span>{{ Math.round((completeness.done / Math.max(1, completeness.total)) * 100) }}%</span>
+          </div>
+          <div class="h-1.5 rounded-full bg-muted overflow-hidden">
+            <div
+              class="h-full bg-success transition-[width] duration-500"
+              :style="{ width: (completeness.done / Math.max(1, completeness.total) * 100) + '%' }"
+            />
+          </div>
+        </div>
+
         <!-- Actions -->
         <div class="flex items-center gap-2 flex-wrap pt-2 border-t">
           <Button v-if="amendable && !editingInPlace" variant="outline" @click="openInPlace">
@@ -770,6 +902,35 @@ function sourceVariant(s?: string): 'default' | 'secondary' | 'outline' {
         </div>
       </CardContent>
     </Card>
+
+    <!-- Sticky action bar khi scroll xuống -->
+    <Transition name="slide-up">
+      <div
+        v-show="showStickyActions"
+        class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 rounded-lg border bg-background/95 backdrop-blur shadow-lg px-3 py-2 flex items-center gap-2 flex-wrap max-w-[min(90vw,900px)]"
+      >
+        <span class="text-xs text-muted-foreground font-mono shrink-0 px-2">{{ v.code }} PB {{ v.version_no }}</span>
+        <AdminStatusBadge :status="v.status" />
+        <div class="h-5 w-px bg-border mx-1" />
+        <Button v-if="canEdit" size="sm" @click="submitOpen = true">
+          <Send class="size-3.5 mr-1" /> Gửi duyệt
+        </Button>
+        <template v-if="hasRole('approver') && v.status === 'pending_approval'">
+          <Button size="sm" @click="approveOpen = true"><Check class="size-3.5 mr-1" /> Duyệt</Button>
+          <Button size="sm" variant="outline" @click="rejectOpen = true"><X class="size-3.5 mr-1" /> Trả lại</Button>
+        </template>
+        <Button
+          v-if="hasRole('approver') && v.status === 'published'"
+          size="sm" variant="outline" class="text-destructive"
+          @click="withdrawOpen = true"
+        >
+          <Ban class="size-3.5 mr-1" /> Ngừng công khai
+        </Button>
+        <Button size="sm" variant="ghost" class="shrink-0" title="Lên đầu trang" @click="scrollToTop">
+          <ChevronsUp class="size-3.5" />
+        </Button>
+      </div>
+    </Transition>
 
     <!-- AI Panel (chỉ hiện với bản nháp / rejected) -->
     <AdminAiPanel v-if="canEdit" :version-id="v.id" :can-use="canEdit" @open-viewer="openAiViewer" />
@@ -954,14 +1115,41 @@ function sourceVariant(s?: string): 'default' | 'secondary' | 'outline' {
     <div class="grid lg:grid-cols-2 gap-4">
       <!-- Fields -->
       <div class="space-y-2">
-        <div class="px-1">
+        <div class="px-1 space-y-2">
           <h2 class="text-base font-semibold">Các trường dữ liệu (bản nháp)</h2>
           <p class="text-xs text-muted-foreground">
             Cột này là nội dung sẽ hiển thị cho công dân. Cột phải là Word gốc <strong>bất biến</strong> (chỉ để đối chiếu).
           </p>
+          <div class="flex items-center gap-2 flex-wrap pt-1">
+            <div class="relative flex-1 min-w-[180px]">
+              <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+              <Input v-model="fieldSearch" placeholder="Lọc theo tên trường…" class="pl-8 h-8" />
+            </div>
+            <Select v-model="fieldFilter">
+              <SelectTrigger class="h-8 w-[180px]">
+                <Filter class="size-3.5 mr-1 text-muted-foreground" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả</SelectItem>
+                <SelectItem value="no_source">Chưa có nguồn</SelectItem>
+                <SelectItem value="manual">Biên tập thủ công</SelectItem>
+                <SelectItem value="has_warning">Có cảnh báo</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" size="sm" class="h-8" title="Mở tất cả" @click="expandAll">
+              <ChevronsDown class="size-3.5" />
+            </Button>
+            <Button variant="outline" size="sm" class="h-8" title="Thu gọn tất cả" @click="collapseAll">
+              <ChevronsUp class="size-3.5" />
+            </Button>
+          </div>
+          <p v-if="filteredFieldKeys.length < Object.keys(v.field_titles).length" class="text-xs text-muted-foreground">
+            {{ filteredFieldKeys.length }} / {{ Object.keys(v.field_titles).length }} trường phù hợp
+          </p>
         </div>
         <div
-          v-for="(title, k, n) in v.field_titles"
+          v-for="k in filteredFieldKeys"
           :key="k"
           :data-field-key="k"
           class="rounded-md border bg-card"
@@ -975,7 +1163,12 @@ function sourceVariant(s?: string): 'default' | 'secondary' | 'outline' {
               class="w-2 h-2 rounded-full shrink-0"
               :style="{ background: fieldRanges[k] ? fieldDotColor(fieldRanges[k].n) : 'transparent', border: fieldRanges[k] ? '' : '1px dashed var(--color-border)' }"
             />
-            <span class="flex-1 font-medium text-sm">{{ title }}</span>
+            <span class="flex-1 font-medium text-sm">{{ v.field_titles[k] }}</span>
+            <Badge
+              v-if="warningsByField[k]"
+              variant="outline"
+              class="font-normal text-xs text-warning border-warning/40"
+            >{{ warningsByField[k] }} ⚠</Badge>
             <Badge
               :variant="sourceVariant(v.content.fields?.[k]?.source)"
               class="font-normal text-xs"
@@ -1047,15 +1240,24 @@ function sourceVariant(s?: string): 'default' | 'secondary' | 'outline' {
 
       <!-- Word pane -->
       <div class="lg:sticky lg:top-32 lg:self-start">
-        <AdminWordViewer
-          ref="wordRef"
-          :html="srcHtml"
-          :loading="srcLoading"
-          :error="srcError"
-          :fields="wordFields"
-          :forms="formRanges"
-          @block-click="onBlockClick"
-        />
+        <div class="space-y-2">
+          <div class="flex items-center justify-end gap-2">
+            <label class="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer">
+              <input type="checkbox" v-model="showHighlights" class="size-3.5" />
+              <Palette class="size-3.5" /> Tô màu vùng đã bóc tách
+            </label>
+          </div>
+          <AdminWordViewer
+            ref="wordRef"
+            :html="srcHtml"
+            :loading="srcLoading"
+            :error="srcError"
+            :fields="effectiveWordFields"
+            :forms="effectiveWordForms"
+            @block-click="onBlockClick"
+            @open-docx-preview="docxPreviewOpen = true"
+          />
+        </div>
       </div>
     </div>
 
@@ -1079,6 +1281,13 @@ function sourceVariant(s?: string): 'default' | 'secondary' | 'outline' {
       :form-id="formPreviewId"
     />
 
+    <!-- Docx preview (Xem bản dựng đẹp) -->
+    <AdminDocxPreviewDialog
+      v-model:open="docxPreviewOpen"
+      :url="docxPreviewUrl"
+      :filename="docxPreviewFilename"
+    />
+
     <!-- AI viewer -->
     <AdminAiViewerDialog
       v-model:open="aiViewerOpen"
@@ -1086,6 +1295,26 @@ function sourceVariant(s?: string): 'default' | 'secondary' | 'outline' {
       :run-id="aiViewerRunId"
       @applied="refresh(); loadSource()"
     />
+
+    <!-- Chặn navigate khi có edit chưa save -->
+    <Dialog v-model:open="leaveOpen">
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle class="flex items-center gap-2">
+            <AlertTriangle class="size-5 text-warning" />
+            Thay đổi chưa lưu
+          </DialogTitle>
+          <DialogDescription>
+            Bạn đang chỉnh trường <strong>{{ editingKey ? v.field_titles[editingKey] : '' }}</strong>
+            nhưng chưa lưu. Rời đi sẽ bỏ các thay đổi đó.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="outline" @click="cancelLeave">Ở lại trang</Button>
+          <Button variant="destructive" @click="confirmLeave">Rời đi, bỏ qua</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
 
     <!-- Dialogs -->
     <Dialog v-model:open="inplaceOpen">
@@ -1194,3 +1423,8 @@ function sourceVariant(s?: string): 'default' | 'secondary' | 'outline' {
     </Dialog>
   </div>
 </template>
+
+<style scoped>
+.slide-up-enter-active, .slide-up-leave-active { transition: all .25s ease; }
+.slide-up-enter-from, .slide-up-leave-to { opacity: 0; transform: translate(-50%, 16px); }
+</style>
