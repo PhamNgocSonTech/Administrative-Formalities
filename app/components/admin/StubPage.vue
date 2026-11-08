@@ -2,11 +2,17 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Construction, Info } from 'lucide-vue-next'
 
-defineProps<{
+const props = defineProps<{
   title: string
   description?: string
   icon?: any
 }>()
+
+const { toast } = useToast()
+
+onMounted(() => {
+  toast.info(`${props.title} — đang phát triển, chưa khả dụng`)
+})
 </script>
 
 <template>
