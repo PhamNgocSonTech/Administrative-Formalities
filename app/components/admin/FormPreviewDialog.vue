@@ -38,35 +38,64 @@ watch(() => props.open, async (v) => {
           <span v-if="label" class="text-sm font-normal text-muted-foreground">— {{ label }}</span>
         </DialogTitle>
         <DialogDescription>
-          Bản xem chỉ kiểm tra cấu trúc nội dung; font / khoảng cách / ngắt trang có thể khác khi mở bằng Word thực.
+          Bản xem trước chỉ để kiểm tra nội dung và cấu trúc; font, khoảng cách và ngắt trang có thể khác khi mở bằng Word.
         </DialogDescription>
       </DialogHeader>
-      <div class="flex-1 overflow-y-auto p-6 bg-background">
+      <!-- Giữ nguyên style như code gốc: pv-wrap (nền xám) + pv-page (trang trắng A4, font Times) -->
+      <div class="pv-wrap">
         <div v-if="loading" class="flex items-center justify-center py-12">
           <Loader2 class="size-5 animate-spin text-muted-foreground" />
         </div>
-        <div v-else-if="errorMsg" class="text-sm text-destructive">{{ errorMsg }}</div>
-        <div v-else class="pv-form" v-html="html" />
+        <div v-else-if="errorMsg" class="pv-page">
+          <p class="text-destructive">{{ errorMsg }}</p>
+        </div>
+        <div v-else class="pv-page" v-html="html" />
       </div>
     </DialogContent>
   </Dialog>
 </template>
 
 <style scoped>
-:deep(.pv-form) {
-  font-size: 14px;
-  line-height: 1.6;
+/* Port nguyên từ styles.css của code gốc */
+.pv-wrap {
+  flex: 1;
+  overflow: auto;
+  background: #d9dee5;
+  padding: 16px;
 }
-:deep(.pv-form table) {
+:deep(.pv-page) {
+  background: #fff;
+  max-width: 794px;
+  margin: 0 auto;
+  padding: 48px 56px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, .25);
+  font-family: "Times New Roman", Times, serif;
+  font-size: 15px;
+  line-height: 1.45;
+  color: #000;
+  min-height: 400px;
+  overflow-wrap: anywhere;
+}
+:deep(.pv-p) { margin: 0 0 6px; }
+:deep(.pv-empty) { margin: 0; line-height: 1; height: 10px; }
+:deep(.pv-c) { text-align: center; }
+:deep(.pv-r) { text-align: right; }
+:deep(.pv-j) { text-align: justify; }
+:deep(.pv-i1) { padding-left: 24px; }
+:deep(.pv-i2) { padding-left: 48px; }
+:deep(.pv-i3) { padding-left: 72px; }
+:deep(.pv-i4) { padding-left: 96px; }
+:deep(.pv-page table) {
   border-collapse: collapse;
   margin: 8px 0;
 }
-:deep(.pv-form td), :deep(.pv-form th) {
-  border: 1px solid var(--color-border);
+:deep(.pv-page td), :deep(.pv-page th) {
+  border: 1px solid #000;
   padding: 4px 8px;
   vertical-align: top;
 }
-:deep(.pv-form p) {
-  margin: 4px 0;
-}
+:deep(.pv-page p) { margin: 0 0 6px; }
+:deep(.pv-page strong) { font-weight: bold; }
+:deep(.pv-page em) { font-style: italic; }
+:deep(.pv-page u) { text-decoration: underline; }
 </style>

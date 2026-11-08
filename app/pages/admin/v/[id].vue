@@ -60,6 +60,7 @@ import {
   CircleCheckBig,
   ChevronsDown,
   ChevronsUp,
+  ListTree,
 } from 'lucide-vue-next'
 
 definePageMeta({ layout: 'admin' })
@@ -729,6 +730,38 @@ function cancelLeave() {
   pendingTo.value = null
 }
 
+// --- Layout editor (dựng danh sách thả xuống) ---
+const layoutOpen = ref(false)
+const layoutOpts = ref<{
+  fieldKey: string
+  fieldTitle: string
+  start: number
+  end: number
+  heads: Array<{ b: number; l: number }>
+  hl: number[]
+} | null>(null)
+
+function openLayoutEditor(k: string) {
+  if (!v.value) return
+  const r = fieldRanges.value[k]
+  if (!r) {
+    toast.err('Trường chưa có vùng nội dung; bấm "Chọn vùng từ Word gốc" trước.')
+    return
+  }
+  const f = v.value.content.fields?.[k]
+  const layout = f?.layout
+  const same = layout?.range && layout.range[0] === r.s && layout.range[1] === r.e
+  layoutOpts.value = {
+    fieldKey: k,
+    fieldTitle: v.value.field_titles[k],
+    start: r.s,
+    end: r.e,
+    heads: same ? (layout.heads as any) || [] : [],
+    hl: same ? (layout.hl as any) || [] : [],
+  }
+  layoutOpen.value = true
+}
+
 // --- Docx preview (Xem bản dựng đẹp) ---
 const docxPreviewOpen = ref(false)
 const docxPreviewUrl = computed(() =>
@@ -1238,6 +1271,12 @@ function sourceVariant(s?: string): 'default' | 'secondary' | 'outline' {
                 <Button variant="outline" size="sm" @click="startEdit(k)">
                   <Pencil class="size-3.5 mr-1" /> Sửa chữ tại phiên bản này
                 </Button>
+                <Button
+                  v-if="fieldRanges[k] && v.content.fields?.[k]?.value"
+                  variant="outline" size="sm" @click="openLayoutEditor(k)"
+                >
+                  <ListTree class="size-3.5 mr-1" /> Dựng danh sách / tô vàng
+                </Button>
                 <span class="text-xs text-muted-foreground">Chọn vùng = lấy nguyên văn Word; sửa chữ = chỉnh thủ công.</span>
               </div>
               <div v-else class="space-y-2">
@@ -1308,6 +1347,20 @@ function sourceVariant(s?: string): 'default' | 'secondary' | 'outline' {
       v-model:open="docxPreviewOpen"
       :url="docxPreviewUrl"
       :filename="docxPreviewFilename"
+    />
+
+    <!-- Layout editor (dựng danh sách thả xuống) -->
+    <AdminLayoutEditorDialog
+      v-if="layoutOpts"
+      v-model:open="layoutOpen"
+      :version-id="v.id"
+      :field-key="layoutOpts.fieldKey"
+      :field-title="layoutOpts.fieldTitle"
+      :start="layoutOpts.start"
+      :end="layoutOpts.end"
+      :heads="layoutOpts.heads"
+      :hl="layoutOpts.hl"
+      @saved="refresh(); loadSource()"
     />
 
     <!-- AI viewer -->

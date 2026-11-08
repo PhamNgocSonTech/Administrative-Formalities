@@ -138,8 +138,11 @@ Phase 3 (polish + UX đợt 2):
 - **Thanh cuộn mảnh + màu đồng bộ theme** (global, Firefox + webkit)
 - **Badge cảnh báo trên field header** nếu có warning ánh xạ theo code
 
-Còn thiếu:
-- **Layout editor** (dựng danh sách thả xuống từ đầu — chỉ hiển thị, chưa có editor)
+Phase 4 (UX chốt chặn):
+- **Cutter drag handles**: 2 thanh kéo-thả BẮT ĐẦU/KẾT THÚC (xanh/đỏ) bám cạnh block đầu/cuối, pointer events + auto-scroll khi kéo gần mép + keyboard ↑↓ khi focus, vẫn giữ click/shift+click và numeric input (giống code gốc)
+- **FormPreviewDialog**: port nguyên CSS `.pv-wrap`/`.pv-page`/`.pv-p` từ styles.css gốc — font Times New Roman, trang A4 trắng 794px, nền xám bao ngoài, giống y hệt Word gốc preview
+- **ConfirmHost** dùng reka-ui primitives trực tiếp với overlay `bg-black/30` nhạt — fix bug AI viewer accept đen màn (2 dialog chồng + 2 lớp bg-black/80 = ~96% đen)
+- **LayoutEditorDialog**: dựng danh sách thả xuống + tô vàng, tải `block-lines?start=X&end=Y`, mỗi dòng 4 nút pill (Mục chủ/Mục con/Nội dung mục/Tô vàng), Shift+Click áp cả đoạn, lưu qua PUT `/layout/{key}`
 
 ---
 
