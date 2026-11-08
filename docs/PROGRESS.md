@@ -104,7 +104,7 @@ File `.env` hiện tại không bắt buộc (mặc định trỏ `NUXT_PUBLIC_A
 | `/admin/qd` | ✅ Done | List + form tạo QĐ, search, bulk delete |
 | `/admin/d/[id]` | ✅ Done | Metadata, action bar, upload file, gắn QĐ cho nhiều TTHC (3-card nguồn + stepper preview + apply với confirm cảnh báo), bảng liên kết |
 | `/admin/v/[id]` | ✅ Done (phase 1+2) | Xem 4 phần dưới |
-| `/admin/duyet` | ⬜ Stub | Chờ duyệt — chưa migrate |
+| `/admin/duyet` | ✅ Done | 2 bảng: versions pending (bulk approve/reject với confirm + báo cáo skipped) + decisions pending (link mở chi tiết) |
 | `/admin/users` | ⬜ Stub | Quản lý tài khoản — chưa migrate |
 | `/admin/config` | ⬜ Stub | Lĩnh vực + số hỗ trợ — chưa migrate |
 | `/admin/audit` | ⬜ Stub | Nhật ký — chưa migrate |
