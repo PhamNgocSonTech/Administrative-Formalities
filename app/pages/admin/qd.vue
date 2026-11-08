@@ -266,13 +266,15 @@ function fmtDate(iso?: string | null) {
         </div>
       </CardHeader>
       <CardContent class="p-0">
-        <div v-if="canBulk && selected.size" class="px-6 py-3 border-t border-b bg-muted/30 flex items-center justify-between">
-          <span class="text-sm text-muted-foreground">Đã chọn {{ selected.size }}</span>
-          <Button variant="destructive" size="sm" @click="deleteOpen = true">
-            <Trash2 class="size-4 mr-1.5" />
-            Xóa
-          </Button>
-        </div>
+        <AdminBulkBar :show="canBulk && selected.size > 0">
+          <div class="px-6 py-3 border-t border-b bg-muted/30 flex items-center justify-between">
+            <span class="text-sm text-muted-foreground">Đã chọn <strong class="text-foreground">{{ selected.size }}</strong></span>
+            <Button variant="destructive" size="sm" @click="deleteOpen = true">
+              <Trash2 class="size-4 mr-1.5" />
+              Xóa
+            </Button>
+          </div>
+        </AdminBulkBar>
 
         <div class="overflow-x-auto">
           <Table>

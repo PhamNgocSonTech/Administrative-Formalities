@@ -272,21 +272,25 @@ function fmtDate(iso?: string | null) {
     </div>
 
     <!-- Toolbar -->
-    <div v-if="filter || (canBulk && selected.size)" class="flex items-center justify-between flex-wrap gap-2">
-      <div v-if="filter" class="flex items-center gap-2 text-sm text-muted-foreground">
-        <Filter class="size-4" />
-        <span>Đang lọc</span>
-        <Button variant="ghost" size="sm" class="h-7" @click="filter = ''">Bỏ lọc</Button>
+    <AdminBulkBar :show="!!filter || (canBulk && selected.size > 0)">
+      <div class="flex items-center justify-between flex-wrap gap-2 py-1">
+        <div v-if="filter" class="flex items-center gap-2 text-sm text-muted-foreground">
+          <Filter class="size-4" />
+          <span>Đang lọc</span>
+          <Button variant="ghost" size="sm" class="h-7" @click="filter = ''">Bỏ lọc</Button>
+        </div>
+        <div v-else></div>
+        <Transition name="fade">
+          <div v-if="canBulk && selected.size" class="flex items-center gap-2">
+            <span class="text-sm text-muted-foreground">Đã chọn <strong class="text-foreground">{{ selected.size }}</strong></span>
+            <Button variant="destructive" size="sm" @click="deleteOpen = true">
+              <Trash2 class="size-4 mr-1.5" />
+              Xóa
+            </Button>
+          </div>
+        </Transition>
       </div>
-      <div v-else></div>
-      <div v-if="canBulk && selected.size" class="flex items-center gap-2">
-        <span class="text-sm text-muted-foreground">Đã chọn {{ selected.size }}</span>
-        <Button variant="destructive" size="sm" @click="deleteOpen = true">
-          <Trash2 class="size-4 mr-1.5" />
-          Xóa
-        </Button>
-      </div>
-    </div>
+    </AdminBulkBar>
 
     <!-- Table -->
     <Card>

@@ -164,33 +164,35 @@ async function bulkAction(kind: 'approve' | 'reject') {
       </CardHeader>
 
       <CardContent class="p-0">
-        <div v-if="canReview && versions.length" class="px-6 py-3 border-t border-b bg-muted/30 flex items-center justify-between flex-wrap gap-2">
-          <span class="text-sm text-muted-foreground">
-            Đã chọn <strong>{{ selected.size }}</strong>
-            / {{ versions.length }}
-          </span>
-          <div class="flex items-center gap-2">
-            <Button
-              size="sm"
-              :disabled="!selected.size || working !== null"
-              @click="bulkAction('approve')"
-            >
-              <Loader2 v-if="working === 'approve'" class="size-3.5 mr-1 animate-spin" />
-              <Check v-else class="size-3.5 mr-1" />
-              Duyệt công khai
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              :disabled="!selected.size || working !== null"
-              @click="bulkAction('reject')"
-            >
-              <Loader2 v-if="working === 'reject'" class="size-3.5 mr-1 animate-spin" />
-              <X v-else class="size-3.5 mr-1" />
-              Trả lại
-            </Button>
+        <AdminBulkBar :show="canReview && versions.length > 0 && selected.size > 0">
+          <div class="px-6 py-3 border-t border-b bg-muted/30 flex items-center justify-between flex-wrap gap-2">
+            <span class="text-sm text-muted-foreground">
+              Đã chọn <strong class="text-foreground">{{ selected.size }}</strong>
+              / {{ versions.length }}
+            </span>
+            <div class="flex items-center gap-2">
+              <Button
+                size="sm"
+                :disabled="!selected.size || working !== null"
+                @click="bulkAction('approve')"
+              >
+                <Loader2 v-if="working === 'approve'" class="size-3.5 mr-1 animate-spin" />
+                <Check v-else class="size-3.5 mr-1" />
+                Duyệt công khai
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                :disabled="!selected.size || working !== null"
+                @click="bulkAction('reject')"
+              >
+                <Loader2 v-if="working === 'reject'" class="size-3.5 mr-1 animate-spin" />
+                <X v-else class="size-3.5 mr-1" />
+                Trả lại
+              </Button>
+            </div>
           </div>
-        </div>
+        </AdminBulkBar>
 
         <div class="overflow-x-auto">
           <Table>
