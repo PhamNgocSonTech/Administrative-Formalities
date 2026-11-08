@@ -762,7 +762,8 @@ const abolishCount = computed(() => {
             </label>
 
             <div
-              class="space-y-2 rounded-md border p-3 cursor-pointer hover:border-primary/60 hover:bg-accent/30 transition-colors select-none"
+              data-clickable
+              class="space-y-2 rounded-md border p-3 hover:border-primary/60 hover:bg-accent/30 transition-colors select-none"
               :class="lk.from_annex ? 'border-primary bg-primary/5' : ''"
               @click="lk.from_annex = !lk.from_annex"
             >

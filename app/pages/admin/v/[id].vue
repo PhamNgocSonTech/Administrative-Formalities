@@ -623,6 +623,13 @@ function openFormPreview(f: FormRow) {
 
 // --- Sticky action bar khi scroll xuống xa khỏi header ---
 const showStickyActions = ref(false)
+const hasQuickActions = computed(() => {
+  if (!v.value) return false
+  if (canEdit.value) return true
+  if (hasRole('approver') && v.value.status === 'pending_approval') return true
+  if (hasRole('approver') && v.value.status === 'published') return true
+  return false
+})
 function onScroll() {
   showStickyActions.value = window.scrollY > 400
 }
@@ -903,31 +910,46 @@ function sourceVariant(s?: string): 'default' | 'secondary' | 'outline' {
       </CardContent>
     </Card>
 
-    <!-- Sticky action bar khi scroll xuống -->
+    <!-- Sticky action bar nhỏ gọn ở góc phải dưới, mặc định thu lại chỉ 1 nút "Lên đầu" -->
     <Transition name="slide-up">
       <div
         v-show="showStickyActions"
-        class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 rounded-lg border bg-background/95 backdrop-blur shadow-lg px-3 py-2 flex items-center gap-2 flex-wrap max-w-[min(90vw,900px)]"
+        class="fixed bottom-4 right-4 z-40 flex flex-col items-end gap-2 group"
       >
-        <span class="text-xs text-muted-foreground font-mono shrink-0 px-2">{{ v.code }} PB {{ v.version_no }}</span>
-        <AdminStatusBadge :status="v.status" />
-        <div class="h-5 w-px bg-border mx-1" />
-        <Button v-if="canEdit" size="sm" @click="submitOpen = true">
-          <Send class="size-3.5 mr-1" /> Gửi duyệt
-        </Button>
-        <template v-if="hasRole('approver') && v.status === 'pending_approval'">
-          <Button size="sm" @click="approveOpen = true"><Check class="size-3.5 mr-1" /> Duyệt</Button>
-          <Button size="sm" variant="outline" @click="rejectOpen = true"><X class="size-3.5 mr-1" /> Trả lại</Button>
-        </template>
-        <Button
-          v-if="hasRole('approver') && v.status === 'published'"
-          size="sm" variant="outline" class="text-destructive"
-          @click="withdrawOpen = true"
+        <!-- Action pills expand khi hover -->
+        <div
+          v-if="hasQuickActions"
+          class="rounded-full border bg-background/95 backdrop-blur shadow-lg flex items-center p-1 gap-1 opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
         >
-          <Ban class="size-3.5 mr-1" /> Ngừng công khai
-        </Button>
-        <Button size="sm" variant="ghost" class="shrink-0" title="Lên đầu trang" @click="scrollToTop">
-          <ChevronsUp class="size-3.5" />
+          <Button v-if="canEdit" size="icon" class="size-8 rounded-full" title="Gửi duyệt" @click="submitOpen = true">
+            <Send class="size-3.5" />
+          </Button>
+          <template v-if="hasRole('approver') && v.status === 'pending_approval'">
+            <Button size="icon" class="size-8 rounded-full" title="Duyệt công khai" @click="approveOpen = true">
+              <Check class="size-3.5" />
+            </Button>
+            <Button size="icon" variant="outline" class="size-8 rounded-full" title="Trả lại" @click="rejectOpen = true">
+              <X class="size-3.5" />
+            </Button>
+          </template>
+          <Button
+            v-if="hasRole('approver') && v.status === 'published'"
+            size="icon" variant="outline" class="size-8 rounded-full text-destructive"
+            title="Ngừng công khai"
+            @click="withdrawOpen = true"
+          >
+            <Ban class="size-3.5" />
+          </Button>
+        </div>
+        <!-- Nút "Lên đầu" luôn hiện, nhỏ -->
+        <Button
+          size="icon"
+          variant="outline"
+          class="size-9 rounded-full shadow-md bg-background/95 backdrop-blur"
+          title="Lên đầu trang"
+          @click="scrollToTop"
+        >
+          <ChevronsUp class="size-4" />
         </Button>
       </div>
     </Transition>
@@ -1426,5 +1448,5 @@ function sourceVariant(s?: string): 'default' | 'secondary' | 'outline' {
 
 <style scoped>
 .slide-up-enter-active, .slide-up-leave-active { transition: all .25s ease; }
-.slide-up-enter-from, .slide-up-leave-to { opacity: 0; transform: translate(-50%, 16px); }
+.slide-up-enter-from, .slide-up-leave-to { opacity: 0; transform: translateY(16px); }
 </style>

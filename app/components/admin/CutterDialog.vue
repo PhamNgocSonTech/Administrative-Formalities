@@ -229,6 +229,7 @@ function fmtBlock(b: Block): string {
             v-for="b in data.blocks"
             :key="b.index"
             :data-i="b.index"
+            data-clickable
             class="flex gap-3 px-6 py-2 border-b border-border/40 text-sm hover:bg-accent/40 transition-colors"
             :class="[
               b.index >= startIdx && b.index <= endIdx ? 'bg-primary/5' : '',

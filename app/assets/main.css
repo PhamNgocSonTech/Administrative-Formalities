@@ -155,7 +155,7 @@
   [contenteditable="true"] {
     cursor: text;
   }
-  button, a, [role="button"], [role="link"], [role="checkbox"], [role="menuitem"], [role="option"], [role="tab"], label[for], select, summary {
+  button, a, [role="button"], [role="link"], [role="checkbox"], [role="menuitem"], [role="option"], [role="tab"], [role="radio"], [role="switch"], [role="combobox"], label[for], select, summary, [data-clickable] {
     cursor: pointer;
   }
   button:disabled, [disabled] {
