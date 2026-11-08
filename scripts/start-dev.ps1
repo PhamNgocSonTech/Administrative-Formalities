@@ -57,7 +57,10 @@ if (Test-PortOpen $BackendPort) {
     Write-Host "[2/3] Starting FastAPI backend in a new terminal..." -ForegroundColor Yellow
     # Pick available shell: prefer pwsh (PS7), fallback to powershell (5.1)
     $shell = if (Get-Command pwsh.exe -ErrorAction SilentlyContinue) { "pwsh" } else { "powershell" }
-    $uvicornCmd = "python -m uvicorn app.main:create_app --factory --app-dir backend --host 127.0.0.1 --port $BackendPort"
+    # Ưu tiên venv riêng của backend (tránh xung đột với Hermes/các venv khác trên máy)
+    $venvPy = Join-Path $Backend ".venv\Scripts\python.exe"
+    $pythonCmd = if (Test-Path $venvPy) { "& `"$venvPy`"" } else { "python" }
+    $uvicornCmd = "$pythonCmd -m uvicorn app.main:create_app --factory --app-dir backend --host 127.0.0.1 --port $BackendPort"
 
     $wtAvailable = Get-Command wt.exe -ErrorAction SilentlyContinue
     if ($wtAvailable) {
