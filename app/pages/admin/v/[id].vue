@@ -239,19 +239,26 @@ function toggleField(k: string): 'opened' | 'closed' {
   return willOpen ? 'opened' : 'closed'
 }
 
+const { begin: refreshBegin, end: refreshEnd } = useRefreshState()
+
 /** Refresh data + loadSource (optional) nhưng giữ openFields + scroll nhẹ tới field nếu truyền key. */
 async function refreshKeepingPosition(opts: { fieldKey?: string; reloadSource?: boolean } = {}) {
   const opened = new Set(openFields.value)
-  await refresh()
-  if (opts.reloadSource) await loadSource()
-  await nextTick()
-  openFields.value = opened
-  await nextTick()
-  if (opts.fieldKey) {
-    document.querySelector(`[data-field-key="${opts.fieldKey}"]`)?.scrollIntoView({
-      behavior: 'instant' as ScrollBehavior,
-      block: 'nearest',
-    })
+  refreshBegin()
+  try {
+    await refresh()
+    if (opts.reloadSource) await loadSource()
+    await nextTick()
+    openFields.value = opened
+    await nextTick()
+    if (opts.fieldKey) {
+      document.querySelector(`[data-field-key="${opts.fieldKey}"]`)?.scrollIntoView({
+        behavior: 'instant' as ScrollBehavior,
+        block: 'nearest',
+      })
+    }
+  } finally {
+    refreshEnd()
   }
 }
 

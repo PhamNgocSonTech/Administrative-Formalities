@@ -5,6 +5,7 @@ import 'vue-sonner/style.css'
 
 <template>
   <div class="min-h-screen bg-background text-foreground">
+    <AdminTopProgressBar />
     <AdminTopNav />
     <main class="max-w-[1440px] mx-auto px-6 py-8">
       <slot />
