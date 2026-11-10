@@ -239,6 +239,22 @@ function toggleField(k: string): 'opened' | 'closed' {
   return willOpen ? 'opened' : 'closed'
 }
 
+/** Refresh data + loadSource (optional) nhưng giữ openFields + scroll nhẹ tới field nếu truyền key. */
+async function refreshKeepingPosition(opts: { fieldKey?: string; reloadSource?: boolean } = {}) {
+  const opened = new Set(openFields.value)
+  await refresh()
+  if (opts.reloadSource) await loadSource()
+  await nextTick()
+  openFields.value = opened
+  await nextTick()
+  if (opts.fieldKey) {
+    document.querySelector(`[data-field-key="${opts.fieldKey}"]`)?.scrollIntoView({
+      behavior: 'instant' as ScrollBehavior,
+      block: 'nearest',
+    })
+  }
+}
+
 /** Click field title bên trái: chỉ scroll Word khi MỞ (giống code gốc check !d.open). */
 function onFieldClick(k: string) {
   const state = toggleField(k)
@@ -576,8 +592,7 @@ function openFieldCutter(k: string) {
           block_end: e,
         })
         toast.ok('Đã lấy nội dung từ vùng đã chọn vào bản nháp')
-        await refresh()
-        await loadSource()
+        await refreshKeepingPosition({ fieldKey: k, reloadSource: true })
         return true
       } catch (err: any) {
         toast.err(err?.message ?? 'Lưu thất bại')
@@ -1393,7 +1408,7 @@ function sourceVariant(s?: string): 'default' | 'secondary' | 'outline' {
       :end="layoutOpts.end"
       :heads="layoutOpts.heads"
       :hl="layoutOpts.hl"
-      @saved="refresh(); loadSource()"
+      @saved="refreshKeepingPosition({ fieldKey: layoutOpts?.fieldKey, reloadSource: true })"
     />
 
     <!-- AI viewer -->
@@ -1401,7 +1416,7 @@ function sourceVariant(s?: string): 'default' | 'secondary' | 'outline' {
       v-model:open="aiViewerOpen"
       :version-id="v.id"
       :run-id="aiViewerRunId"
-      @applied="refresh(); loadSource()"
+      @applied="refreshKeepingPosition({ reloadSource: true })"
     />
 
     <!-- Chặn navigate khi có edit chưa save -->
