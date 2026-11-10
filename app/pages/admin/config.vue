@@ -126,8 +126,10 @@ async function deleteSector(s: Sector) {
 }
 
 // Create contact
+// "__general__" là sentinel cho "số chung không gắn lĩnh vực nào" — SelectItem không chấp nhận value=""
+const GENERAL_SECTOR = '__general__'
 const newContact = reactive({
-  sector_id: '',
+  sector_id: GENERAL_SECTOR,
   label: '',
   phone: '',
   note: '',
@@ -142,13 +144,15 @@ async function addContact() {
   addingContact.value = true
   try {
     await api('POST', '/api/admin/config/contacts', {
-      sector_id: newContact.sector_id ? Number(newContact.sector_id) : null,
+      sector_id: newContact.sector_id && newContact.sector_id !== GENERAL_SECTOR
+        ? Number(newContact.sector_id)
+        : null,
       label: newContact.label.trim(),
       phone: newContact.phone.trim(),
       note: newContact.note.trim() || null,
     })
     toast.ok('Đã thêm số hỗ trợ')
-    newContact.sector_id = ''
+    newContact.sector_id = GENERAL_SECTOR
     newContact.label = ''
     newContact.phone = ''
     newContact.note = ''
@@ -304,9 +308,9 @@ async function deleteContact(c: Contact) {
           <div class="space-y-1.5">
             <Label class="text-xs">Áp dụng cho</Label>
             <Select v-model="newContact.sector_id">
-              <SelectTrigger><SelectValue placeholder="Số chung (dự phòng)" /></SelectTrigger>
+              <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Số chung (dự phòng)</SelectItem>
+                <SelectItem :value="GENERAL_SECTOR">Số chung (dự phòng)</SelectItem>
                 <SelectItem v-for="s in (sectors ?? []).filter((x) => x.is_active)" :key="s.id" :value="String(s.id)">
                   {{ s.name }}
                 </SelectItem>
