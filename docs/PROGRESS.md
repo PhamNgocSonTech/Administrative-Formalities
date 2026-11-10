@@ -1,9 +1,11 @@
 # Tiến độ dự án Nuxt — Quản trị TTHC ngành Công Thương Tây Ninh
 
-Cập nhật: **2026-11-08**
-Nhánh: `feature/admin-shadcn-fastapi`
+Cập nhật: **2026-11-10**
+Nhánh: `feature/admin-shadcn-fastapi` (22 commits)
 
-Dự án Nuxt này là **giao diện quản trị** (admin UI) cho hệ thống tra cứu Thủ tục hành chính. Nó **không tự quản lý dữ liệu** — mọi API gọi về backend FastAPI chạy riêng (repo `tthc-tra-cuu-main` của chủ dự án).
+Dự án Nuxt này là **giao diện quản trị + cổng tra cứu** cho hệ thống TTHC. Nó **không tự quản lý dữ liệu** — mọi API gọi về backend FastAPI chạy riêng (repo `tthc-tra-cuu-main` của chủ dự án).
+
+**Trạng thái: 100% core features**. 10/10 admin views + 5/5 public views xong.
 
 ---
 
@@ -225,17 +227,100 @@ Phase 4 (UX chốt chặn):
 
 ---
 
-## 8. Tổng quan commit đã có
-
-Branch `feature/admin-shadcn-fastapi` (từ mới tới cũ):
+## 8. Tổng quan commit (22 commits trên `feature/admin-shadcn-fastapi`)
 
 ```
-feat(admin): polish WordViewer + xem bản dựng đẹp + UX đợt 2
-docs: thêm PROGRESS.md tóm tắt tiến độ dự án Nuxt admin
-feat(admin): các trang quản trị TTHC (list, import, quyết định, chi tiết phiên bản)
-feat(admin): proxy /api → FastAPI backend + auth cookie 3 vai trò
-feat(admin): nền tảng shadcn-vue + Tailwind v4 cho giao diện quản trị
+a410577 fix(ui): sửa import path registry/new-york/ui → components/ui trong calendar
+ae73fe1 feat(public): 5 trang công dân + DatePicker shadcn thay native
+8601913 fix(admin): SelectItem không chấp nhận value='' — dùng sentinel cho 'Số chung'
+b1d229c feat(admin): hoàn thiện Users + Config + Audit — bám logic code gốc
+f5941e6 fix(admin): dialog cutter/layout/form-preview phải bấm 2 lần mới load
+a4fa90c feat(admin): Cutter drag handles + Layout editor + fix AI dialog + Form preview CSS gốc
+... (14 commits trước)
 ```
+
+Chưa push lên remote. Push:
+```bash
+git push -u origin feature/admin-shadcn-fastapi
+```
+
+---
+
+## 9. ✅ Full flow test checklist end-to-end
+
+**Mở `npm run dev:all` + DevTools F12 (Console + Network).**
+
+### PHẦN 1 — Chuẩn bị môi trường (admin)
+- [ ] 1.1 `/admin/login` login `quantri` → chuyển `/admin`, nhớ username lần sau
+- [ ] 1.2 `/admin/users`: tạo `editor1`/`pass123editor` (role Biên tập), `approver1`/`pass123approver` (role Phê duyệt). Khoá/mở khoá 1 user → dialog shadcn
+- [ ] 1.3 `/admin/config`: thêm lĩnh vực `Hoá chất`, `Xăng dầu` + hotline chung + hotline theo lĩnh vực
+
+### PHẦN 2 — Nạp dữ liệu TTHC
+- [ ] 2.1 `/admin/import`: kéo-thả DOCX → progress bar → batch result với stats
+- [ ] 2.2 Verify DB (pgAdmin): `SELECT * FROM procedures ORDER BY id DESC LIMIT 5;`
+
+### PHẦN 3 — Rà soát + sửa TTHC
+- [ ] 3.1 `/admin`: thấy TTHC mới ở chip "Không công khai → Nháp"
+- [ ] 3.2 Version detail — các tính năng:
+  - Progress bar completeness
+  - Filter field (chưa có nguồn / có cảnh báo)
+  - WordViewer: vùng tô màu, click field → outline đồng màu
+  - Zoom 90-125% + Ctrl+F tìm text + Mini-map
+  - Toggle "Tô màu" on/off
+- [ ] 3.3 Sửa 1 field: không nhảy đầu trang, dirty state cảnh báo khi điều hướng
+- [ ] 3.4 Cutter: drag pill xanh/đỏ, click/shift+click, nhập số, autoscroll gần mép
+- [ ] 3.5 Biểu mẫu: Xem trước (font Times A4), Ranh giới (Cutter), Tách thêm
+- [ ] 3.6 Layout editor (dựng danh sách): Mục chủ/con/nội dung, Shift+Click áp đoạn, tô vàng
+- [ ] 3.7 AI (nếu có key): Chạy → Trình đối chiếu diff → Chấp nhận (confirm KHÔNG đen màn)
+- [ ] 3.8 Gửi duyệt → status "Chờ duyệt"
+
+### PHẦN 4 — Quyết định công bố
+- [ ] 4.1 `/admin/qd`: tạo QĐ với DatePicker shadcn (chọn ngày ký, hiệu lực)
+- [ ] 4.2 `/admin/d/{id}` → "Gắn QĐ cho nhiều TTHC": nhập mã → Xem trước đối chiếu → chọn Ban hành mới → confirm → apply
+- [ ] 4.3 Upload file PDF/DOCX
+- [ ] 4.4 Gửi duyệt QĐ
+
+### PHẦN 5 — Phê duyệt công khai
+- [ ] 5.1 `/admin/duyet`: thấy TTHC + QĐ trong 2 bảng. Tick → BulkBar trượt mượt (grid-rows animation) → Duyệt công khai → toast X/N ok
+- [ ] 5.2 Mở QĐ riêng → Duyệt (vì có cảnh báo auto_withdrawn)
+- [ ] 5.3 Verify `/admin`: chip "Công khai" +1, version status "Đang công khai"
+
+### PHẦN 6 — Nhật ký
+- [ ] 6.1 `/admin/audit`: thấy entries `auth.login`, `import.docx`, `version.submit`, `version.approve`, `decision.create`
+- [ ] 6.2 Filter "approve" → thu hẹp
+- [ ] 6.3 Click row → expand JSON detail
+
+### PHẦN 7 — Public UI (tab incognito)
+- [ ] 7.1 `/` — hero + search + chip lĩnh vực đúng count
+- [ ] 7.2 `/thu-tuc/{code}` — breadcrumb + 6 fact tile + TOC sticky scroll smooth + tải biểu mẫu + In hướng dẫn (print preview)
+- [ ] 7.3 `/quyet-dinh` — list QĐ, click → chi tiết + list TTHC
+- [ ] 7.4 `/lien-he` — số chung + theo lĩnh vực, click số → `tel:`
+
+### Edge cases
+- [ ] F5 giữa khi edit field → dialog cảnh báo "Thay đổi chưa lưu"
+- [ ] Logout → `/admin/login`, state clear sạch
+- [ ] Reload sau 8h (session Max-Age=28800) → auto redirect login
+- [ ] Tab active underline + nền primary/8 đổi khi click nav
+- [ ] Toast "đang phát triển" không còn hiện (3 view đã migrate)
+
+---
+
+## 10. Vẫn chưa làm (optional, có thể để sau)
+
+| Mảng | Token ước | Khi cần |
+|---|---|---|
+| Chatbot UI (public) | ~15k | Khi backend bật chatbot + có Qdrant |
+| Deploy docker-compose (Caddy + PG + FastAPI + Nuxt) | ~15k | Khi thuê VPS production |
+| `openapi-typescript` auto-gen types | ~5k | Sync BE-FE type, nice-to-have |
+| Backup pg_dump → R2 nightly | ~3k | Prod |
+
+---
+
+## Lịch sử phiên bản
+
+- **2026-11-10**: thêm Public UI (5 trang) + DatePicker shadcn + 3 view admin cuối (Users/Config/Audit) + fix SelectItem empty value + sửa import path calendar. **Đạt 100% core features.**
+- **2026-11-08 muộn**: Cutter drag handles + Layout editor + fix AI dialog stacking + Form preview CSS gốc + BulkBar transition mượt
+- **2026-11-08 sớm**: 7 commit đầu (foundation shadcn + proxy + 6 view admin + Phase 2 Version detail + polish WordViewer + Docx preview)
 
 Chưa push lên remote. Push khi sẵn sàng:
 
