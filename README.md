@@ -21,10 +21,10 @@ Giao diện quản trị + cổng tra cứu công dân cho hệ thống Thủ t�
 
 ## 2. Setup backend (lần đầu)
 
-Clone backend repo riêng ở `C:\Users\<bạn>\Downloads\tthc-tra-cuu-main\` (hoặc đường dẫn khác — sửa biến `$Backend` trong `scripts/start-dev.ps1`).
+Clone backend repo `tthc-tra-cuu-main` vào bất kỳ chỗ nào trên máy — gọi là `<BACKEND_DIR>`. Thao tác đều trong thư mục đó:
 
 ```powershell
-cd C:\Users\<bạn>\Downloads\tthc-tra-cuu-main
+cd <BACKEND_DIR>
 
 # 1. Venv Python + cài deps
 python -m venv .venv
@@ -43,15 +43,18 @@ python -m app.cli create-user quantri --roles system_admin,editor,approver --ful
 # Nhập mật khẩu ≥10 ký tự, có chữ và số, không chứa username
 ```
 
-Xem chi tiết: `tthc-tra-cuu-main/docs/HUONG_DAN_CAI_DAT.md`.
+Xem chi tiết: `<BACKEND_DIR>/docs/HUONG_DAN_CAI_DAT.md`.
+
+> **Nếu dùng `npm run dev:all`**: sửa biến `$Backend` trong [`scripts/start-dev.ps1`](scripts/start-dev.ps1) trỏ đúng `<BACKEND_DIR>` của bạn.
 
 ---
 
 ## 3. Setup Nuxt (lần đầu)
 
+Ở thư mục gốc dự án Nuxt này:
+
 ```bash
-cd D:\Workspace\Nuxt_Project\Administrative-Formalities
-fnm use 20
+fnm use 20     # đảm bảo Node 20
 npm install
 ```
 
@@ -75,12 +78,12 @@ Mở http://localhost:3000/admin/login → đăng nhập tài khoản đã tạo
 **Cách thủ công (2 terminal riêng):**
 
 ```powershell
-# Terminal 1 — backend ở Downloads/tthc-tra-cuu-main/
+# Terminal 1 — ở <BACKEND_DIR>
 .\.venv\Scripts\python.exe -m uvicorn app.main:create_app --factory --app-dir backend --host 127.0.0.1 --port 8800
 ```
 
 ```powershell
-# Terminal 2 — Nuxt ở D:\Workspace\...\Administrative-Formalities
+# Terminal 2 — ở thư mục gốc Nuxt
 fnm use 20
 npm run dev
 ```
