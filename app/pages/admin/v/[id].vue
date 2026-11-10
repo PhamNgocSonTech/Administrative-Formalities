@@ -1212,7 +1212,7 @@ function sourceVariant(s?: string): 'default' | 'secondary' | 'outline' {
           <button
             type="button"
             class="w-full flex items-center gap-2 px-3 py-2.5 text-left hover:bg-accent/40 transition-colors"
-            @click="toggleField(k); focusField(k)"
+            @click="onFieldClick(k)"
           >
             <span
               class="w-2 h-2 rounded-full shrink-0"
