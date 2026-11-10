@@ -237,14 +237,14 @@ function toggleField(k: string) {
   openFields.value = s
 }
 
-// When clicking a block in Word → open corresponding field
+// Click block Word → mở field tương ứng bên trái + tô vàng vùng, KHÔNG scroll Word (giữ vị trí user đang xem)
 function onBlockClick(idx: number) {
   for (const [k, r] of Object.entries(fieldRanges.value)) {
     if (idx >= r.s && idx <= r.e) {
       openFields.value = new Set([...openFields.value, k])
-      wordRef.value?.highlight(r.s, r.e)
+      wordRef.value?.markHighlight(r.s, r.e)
       nextTick(() => {
-        document.querySelector(`[data-field-key="${k}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        document.querySelector(`[data-field-key="${k}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
       })
       return
     }

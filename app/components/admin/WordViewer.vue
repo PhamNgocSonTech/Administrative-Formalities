@@ -190,11 +190,22 @@ function doPaint() {
   computeMinimap()
 }
 
-/** Highlight blocks in [start, end]; scroll first into view. */
+/** Highlight blocks in [start, end]; scroll first into view (dùng khi click field bên trái). */
 function highlight(start: number, end: number) {
+  markHighlight(start, end)
   const w = wrapRef.value
   if (!w) return
-  let first: HTMLElement | null = null
+  const first = w.querySelector<HTMLElement>('.pv-blk.pv-hit')
+  if (first) {
+    const top = first.offsetTop - (w.offsetTop || 0) - 24
+    w.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
+  }
+}
+
+/** Chỉ tô vàng/outline các block trong range, KHÔNG scroll (dùng khi click block Word để khỏi nhảy vị trí user đang xem). */
+function markHighlight(start: number, end: number) {
+  const w = wrapRef.value
+  if (!w) return
   w.querySelectorAll<HTMLElement>('.pv-blk').forEach((el) => {
     const i = Number(el.dataset.i)
     const on = i >= start && i <= end
@@ -207,12 +218,7 @@ function highlight(start: number, end: number) {
       el.style.removeProperty('outline')
       el.style.removeProperty('outline-offset')
     }
-    if (on && !first) first = el
   })
-  if (first) {
-    const top = first.offsetTop - (w.offsetTop || 0) - 24
-    w.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
-  }
 }
 
 function clearHighlight() {
@@ -279,7 +285,7 @@ onBeforeUnmount(() => {
   wrapRef.value?.removeEventListener('scroll', updateViewport)
 })
 
-defineExpose({ highlight, clearHighlight, repaint: doPaint })
+defineExpose({ highlight, markHighlight, clearHighlight, repaint: doPaint })
 </script>
 
 <template>
