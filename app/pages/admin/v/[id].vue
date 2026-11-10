@@ -353,12 +353,21 @@ async function saveSector(k: string, value: string) {
   if (!v.value) return
   const pub = editingInPlace.value
   savingKey.value = k
+  const opened = new Set(openFields.value)
   try {
     const reason = pub ? inplaceReason.value[v.value.id] : ''
     const realValue = value === SECTOR_NONE ? '' : value
     await api('PUT', `/api/admin/versions/${v.value.id}/fields/${k}/text`, { value: realValue, reason })
     toast.ok('Đã lưu lĩnh vực')
     await refresh()
+    await nextTick()
+    openFields.value = opened
+    await nextTick()
+    // Giữ field vừa chọn trong viewport (chỉ scroll nếu ra ngoài tầm)
+    document.querySelector(`[data-field-key="${k}"]`)?.scrollIntoView({
+      behavior: 'instant' as ScrollBehavior,
+      block: 'nearest',
+    })
   } catch (e: any) {
     toast.err(e?.message ?? 'Lưu thất bại')
   } finally {
