@@ -105,9 +105,9 @@ File `.env` hiện tại không bắt buộc (mặc định trỏ `NUXT_PUBLIC_A
 | `/admin/d/[id]` | ✅ Done | Metadata, action bar, upload file, gắn QĐ cho nhiều TTHC (3-card nguồn + stepper preview + apply với confirm cảnh báo), bảng liên kết |
 | `/admin/v/[id]` | ✅ Done (phase 1+2) | Xem 4 phần dưới |
 | `/admin/duyet` | ✅ Done | 2 bảng: versions pending (bulk approve/reject với confirm + báo cáo skipped) + decisions pending (link mở chi tiết) |
-| `/admin/users` | ⬜ Stub | Quản lý tài khoản — chưa migrate |
-| `/admin/config` | ⬜ Stub | Lĩnh vực + số hỗ trợ — chưa migrate |
-| `/admin/audit` | ⬜ Stub | Nhật ký — chưa migrate |
+| `/admin/users` | ✅ Done | Form tạo + table CRUD vai trò per-row (draft + save), khóa/mở khóa với confirm, đặt lại mật khẩu (dialog + show/hide), validate ≥10 ký tự có chữ + số |
+| `/admin/config` | ✅ Done | 2 section: lĩnh vực (name + sort_order) + số hỗ trợ (sector_id, label, phone, note). CRUD với confirm, toggle is_active |
+| `/admin/audit` | ✅ Done | Table 300 dòng gần nhất với filter theo actor/action/entity, click row expand JSON detail |
 
 ### Chi tiết `/admin/v/[id]` (version detail)
 
