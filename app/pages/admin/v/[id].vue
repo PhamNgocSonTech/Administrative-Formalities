@@ -320,8 +320,6 @@ async function saveField(k: string) {
     variant: 'warning',
   }))) return
   savingKey.value = k
-  // Snapshot scroll + mở field để restore sau refresh
-  const scrollY = window.scrollY
   const opened = new Set(openFields.value)
   try {
     const reason = editReason.value[k]?.trim() || (pub ? inplaceReason.value[v.value.id] : '')
@@ -336,7 +334,11 @@ async function saveField(k: string) {
     await nextTick()
     openFields.value = opened
     await nextTick()
-    window.scrollTo({ top: scrollY, behavior: 'instant' as ScrollBehavior })
+    // Scroll tới đúng field vừa sửa (bền hơn snapshot scrollY vì layout đổi sau refresh)
+    document.querySelector(`[data-field-key="${k}"]`)?.scrollIntoView({
+      behavior: 'instant' as ScrollBehavior,
+      block: 'center',
+    })
   } catch (e: any) {
     toast.err(e?.message ?? 'Lưu thất bại')
   } finally {
