@@ -230,21 +230,33 @@ const wordFields = computed(() =>
 
 // Field expand/collapse state
 const openFields = ref<Set<string>>(new Set())
-function toggleField(k: string) {
+function toggleField(k: string): 'opened' | 'closed' {
   const s = new Set(openFields.value)
-  if (s.has(k)) s.delete(k)
-  else s.add(k)
+  const willOpen = !s.has(k)
+  if (willOpen) s.add(k)
+  else s.delete(k)
   openFields.value = s
+  return willOpen ? 'opened' : 'closed'
 }
 
-// Click block Word → mở field tương ứng bên trái + tô vàng vùng, KHÔNG scroll Word (giữ vị trí user đang xem)
+/** Click field title bên trái: chỉ scroll Word khi MỞ (giống code gốc check !d.open). */
+function onFieldClick(k: string) {
+  const state = toggleField(k)
+  if (state === 'opened') {
+    const r = fieldRanges.value[k]
+    if (r) wordRef.value?.highlight(r.s, r.e)
+    else wordRef.value?.clearHighlight()
+  }
+}
+
+/** Click block Word bên phải: mở field + tô vùng + scroll trang 'nearest' (không nhảy nếu field đã trong viewport). */
 function onBlockClick(idx: number) {
   for (const [k, r] of Object.entries(fieldRanges.value)) {
     if (idx >= r.s && idx <= r.e) {
       openFields.value = new Set([...openFields.value, k])
       wordRef.value?.markHighlight(r.s, r.e)
       nextTick(() => {
-        document.querySelector(`[data-field-key="${k}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        document.querySelector(`[data-field-key="${k}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
       })
       return
     }
