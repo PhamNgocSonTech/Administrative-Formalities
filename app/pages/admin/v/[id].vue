@@ -346,14 +346,17 @@ async function saveField(k: string) {
   }
 }
 
-// Sector field uses select
+// Sector field uses select — reka-ui không cho SelectItem value="" nên dùng sentinel
+const SECTOR_NONE = '__none__'
+
 async function saveSector(k: string, value: string) {
   if (!v.value) return
   const pub = editingInPlace.value
   savingKey.value = k
   try {
     const reason = pub ? inplaceReason.value[v.value.id] : ''
-    await api('PUT', `/api/admin/versions/${v.value.id}/fields/${k}/text`, { value, reason })
+    const realValue = value === SECTOR_NONE ? '' : value
+    await api('PUT', `/api/admin/versions/${v.value.id}/fields/${k}/text`, { value: realValue, reason })
     toast.ok('Đã lưu lĩnh vực')
     await refresh()
   } catch (e: any) {
@@ -1267,13 +1270,20 @@ function sourceVariant(s?: string): 'default' | 'secondary' | 'outline' {
             <!-- Sector select -->
             <template v-if="canChange && k === 'linh_vuc'">
               <Label class="text-xs">Lĩnh vực</Label>
-              <Select :model-value="v.content.fields?.[k]?.value || ''" @update:model-value="(val) => saveSector(k, val as string)">
-                <SelectTrigger class="h-9"><SelectValue placeholder="— chưa chọn —" /></SelectTrigger>
+              <Select
+                :model-value="v.content.fields?.[k]?.value || SECTOR_NONE"
+                @update:model-value="(val) => saveSector(k, val as string)"
+              >
+                <SelectTrigger class="h-9"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">— chưa chọn —</SelectItem>
+                  <SelectItem :value="SECTOR_NONE">— chưa chọn —</SelectItem>
                   <SelectItem v-for="s in activeSectors" :key="s.id" :value="s.name">{{ s.name }}</SelectItem>
                 </SelectContent>
               </Select>
+              <p v-if="!activeSectors.length" class="text-xs text-muted-foreground">
+                Chưa có lĩnh vực nào. Thêm tại
+                <NuxtLink to="/admin/config" class="text-primary hover:underline">Lĩnh vực &amp; hỗ trợ</NuxtLink>.
+              </p>
             </template>
 
             <!-- Text editor -->
