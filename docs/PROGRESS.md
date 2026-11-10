@@ -109,6 +109,18 @@ File `.env` hiện tại không bắt buộc (mặc định trỏ `NUXT_PUBLIC_A
 | `/admin/config` | ✅ Done | 2 section: lĩnh vực (name + sort_order) + số hỗ trợ (sector_id, label, phone, note). CRUD với confirm, toggle is_active |
 | `/admin/audit` | ✅ Done | Table 300 dòng gần nhất với filter theo actor/action/entity, click row expand JSON detail |
 
+### Public UI (công dân tra cứu)
+
+| Route | Trạng thái | Ghi chú |
+|---|---|---|
+| `/` | ✅ Done | Hero + search + chip lĩnh vực + list kết quả + pager |
+| `/thu-tuc/[code]` | ✅ Done | Breadcrumb + hero facts + TOC sticky + 11 section field + biểu mẫu + QĐ + hỗ trợ, in giấy được |
+| `/quyet-dinh` | ✅ Done | Search + danh sách QĐ công khai (DecisionCard) |
+| `/quyet-dinh/[id]` | ✅ Done | Chi tiết QĐ + list TTHC đang/từng công khai |
+| `/lien-he` | ✅ Done | Số chung + theo lĩnh vực với click-to-call tel: |
+
+Public layout dùng shadcn tokens, sticky header + footer legal disclaimer. Cấu trúc URL giữ nguyên code gốc để backend trả link đúng.
+
 ### Chi tiết `/admin/v/[id]` (version detail)
 
 Phase 1 (core nghiệp vụ):

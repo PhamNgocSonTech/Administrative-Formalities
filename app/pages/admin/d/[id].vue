@@ -1016,11 +1016,11 @@ const abolishCount = computed(() => {
           </div>
           <div class="space-y-2">
             <Label>Ngày ký</Label>
-            <Input v-model="edit.signed_date" type="date" />
+            <AdminDatePicker v-model="edit.signed_date" />
           </div>
           <div class="space-y-2">
             <Label>Ngày hiệu lực</Label>
-            <Input v-model="edit.effective_from" type="date" />
+            <AdminDatePicker v-model="edit.effective_from" />
           </div>
           <div class="space-y-2 md:col-span-2">
             <Label>Trích yếu</Label>
@@ -1069,11 +1069,11 @@ const abolishCount = computed(() => {
           </div>
           <div class="space-y-2">
             <Label>Ngày ký</Label>
-            <Input v-model="replaceForm.signed_date" type="date" />
+            <AdminDatePicker v-model="replaceForm.signed_date" />
           </div>
           <div class="space-y-2">
             <Label>Ngày hiệu lực</Label>
-            <Input v-model="replaceForm.effective_from" type="date" />
+            <AdminDatePicker v-model="replaceForm.effective_from" />
           </div>
           <div class="space-y-2 md:col-span-2">
             <Label>Trích yếu *</Label>

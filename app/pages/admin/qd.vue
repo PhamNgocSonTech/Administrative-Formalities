@@ -213,14 +213,14 @@ function fmtDate(iso?: string | null) {
           </div>
           <div class="space-y-2">
             <Label for="sd">Ngày ký</Label>
-            <Input id="sd" v-model="form.signed_date" type="date" />
+            <AdminDatePicker v-model="form.signed_date" placeholder="Chọn ngày ký" />
           </div>
           <div class="space-y-2">
             <Label for="ef">
               Ngày bắt đầu hiệu lực
               <span class="text-xs text-muted-foreground font-normal">(không suy từ ngày ký)</span>
             </Label>
-            <Input id="ef" v-model="form.effective_from" type="date" />
+            <AdminDatePicker v-model="form.effective_from" placeholder="Chọn ngày hiệu lực" />
           </div>
           <div class="space-y-2 md:col-span-2">
             <Label for="sum">Trích yếu <span class="text-destructive">*</span></Label>
