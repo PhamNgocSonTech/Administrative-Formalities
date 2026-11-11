@@ -43,6 +43,9 @@ python -m app.cli create-user quantri --roles system_admin,editor,approver --ful
 # Nhập mật khẩu ≥10 ký tự, có chữ và số, không chứa username
 ```
 
+> **Mỗi lần cài đặt có DB riêng + user riêng**. Không có tài khoản chung giữa các developer — bạn phải tự tạo ở bước 3 trước khi login được.
+> **Quên pass?** Reset qua CLI trong venv backend (xem mục 7 — Troubleshooting).
+
 Xem chi tiết: `<BACKEND_DIR>/docs/HUONG_DAN_CAI_DAT.md`.
 
 > **Nếu dùng `npm run dev:all`**: sửa biến `$Backend` trong [`scripts/start-dev.ps1`](scripts/start-dev.ps1) trỏ đúng `<BACKEND_DIR>` của bạn.
@@ -140,6 +143,8 @@ Restart `uvicorn` sau khi đổi `.env`.
 | `pwsh not found` khi `npm run dev:all` | Chưa có PowerShell 7. Script tự fallback `powershell` (5.1) |
 | F5 phải login lại | Session cookie 8h đã hết. Login lại |
 | Public UI 404 trên `/thu-tuc/{mã}` | Backend chưa có TTHC công khai. Import DOCX + duyệt trước |
+| Login báo sai username/password | Chưa chạy `create-user` ở bước 2. Chạy ngay |
+| Quên mật khẩu admin | Reset qua CLI (chạy trong venv backend ở `<BACKEND_DIR>/backend`): `..\.venv\Scripts\python.exe -c "from app.security import hash_password; from app.db import session_factory; from app.config import get_settings; import sqlalchemy as sa; s=session_factory(get_settings().database_url)(); s.execute(sa.text('UPDATE users SET password_hash=:h, failed_logins=0, locked_until=NULL WHERE username=:u'), {'h': hash_password('MatKhauMoi123'), 'u': 'quantri'}); s.commit(); print('OK')"` (đổi `MatKhauMoi123` thành pass bạn muốn) |
 
 ---
 
