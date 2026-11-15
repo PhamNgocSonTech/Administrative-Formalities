@@ -246,18 +246,17 @@ onBeforeUnmount(stopAutoScroll)
 
 <template>
   <Dialog :open="open" @update:open="emit('update:open', $event)">
-    <DialogContent class="max-w-4xl max-h-[90vh] p-0 flex flex-col">
-      <DialogHeader class="px-6 pt-6 pb-3 border-b">
-        <DialogTitle class="flex items-center gap-2">
-          <Scissors class="size-5 text-primary" />
-          {{ title }}
-          <span v-if="data" class="text-sm font-normal text-muted-foreground">
+    <DialogContent class="max-w-6xl max-h-[95vh] !p-0 !gap-0 flex flex-col">
+      <DialogHeader class="px-4 pt-3 pb-2 border-b space-y-0">
+        <DialogTitle class="flex items-center gap-2 text-base">
+          <Scissors class="size-4 text-primary" />
+          <span class="truncate">{{ title }}</span>
+          <span v-if="data" class="text-xs font-normal text-muted-foreground shrink-0">
             — {{ data.code }} · {{ total }} khối
           </span>
         </DialogTitle>
-        <DialogDescription>
-          Kéo thanh <b class="text-success">BẮT ĐẦU</b> (xanh) và <b class="text-destructive">KẾT THÚC</b> (đỏ)
-          tới vị trí mong muốn. Hoặc click dòng (Shift+Click = đặt kết thúc), hoặc nhập số khối, hoặc dùng phím ↑↓ khi focus handle.
+        <DialogDescription class="text-xs text-muted-foreground mt-0.5">
+          Kéo <b class="text-success font-semibold">BẮT ĐẦU</b> / <b class="text-destructive font-semibold">KẾT THÚC</b>, click dòng (Shift+Click = kết thúc), hoặc ↑↓ khi focus handle.
         </DialogDescription>
       </DialogHeader>
 
@@ -267,34 +266,34 @@ onBeforeUnmount(stopAutoScroll)
 
       <template v-else-if="data">
         <!-- Controls -->
-        <div class="px-6 py-3 border-b bg-muted/30 flex items-end gap-3 flex-wrap">
-          <div class="space-y-1.5">
-            <Label class="text-xs">Từ khối</Label>
+        <div class="px-4 py-2 border-b bg-muted/30 flex items-end gap-2 flex-wrap">
+          <div class="space-y-1">
+            <Label class="text-[11px] leading-none">Từ khối</Label>
             <Input
-              type="number" class="w-24 h-9"
+              type="number" class="w-20 h-8"
               :min="0" :max="total - 1"
               :model-value="startIdx"
               @update:model-value="syncStart($event as string)"
             />
           </div>
-          <div class="space-y-1.5">
-            <Label class="text-xs">Đến khối</Label>
+          <div class="space-y-1">
+            <Label class="text-[11px] leading-none">Đến khối</Label>
             <Input
-              type="number" class="w-24 h-9"
+              type="number" class="w-20 h-8"
               :min="0" :max="total - 1"
               :model-value="endIdx"
               @update:model-value="syncEnd($event as string)"
             />
           </div>
           <template v-if="withLabel">
-            <div class="space-y-1.5 flex-1 min-w-[200px]">
-              <Label class="text-xs">Nhãn (tùy chọn)</Label>
-              <Input v-model="label" placeholder="vd. Mẫu số 05" class="h-9" />
+            <div class="space-y-1 flex-1 min-w-[180px]">
+              <Label class="text-[11px] leading-none">Nhãn (tùy chọn)</Label>
+              <Input v-model="label" placeholder="vd. Mẫu số 05" class="h-8" />
             </div>
-            <div class="space-y-1.5">
-              <Label class="text-xs">Loại</Label>
+            <div class="space-y-1">
+              <Label class="text-[11px] leading-none">Loại</Label>
               <Select v-model="formType">
-                <SelectTrigger class="w-[180px] h-9"><SelectValue /></SelectTrigger>
+                <SelectTrigger class="w-[160px] h-8"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="unclassified">Chưa phân loại</SelectItem>
                   <SelectItem value="application">Mẫu người nộp</SelectItem>
@@ -303,7 +302,7 @@ onBeforeUnmount(stopAutoScroll)
               </Select>
             </div>
           </template>
-          <Button variant="outline" size="sm" class="h-9" @click="scrollTo(startIdx)">Đến vị trí đang chọn</Button>
+          <Button variant="outline" size="sm" class="h-8" @click="scrollTo(startIdx)">Đến vị trí đang chọn</Button>
         </div>
 
         <!-- Block list + drag handles -->
@@ -353,7 +352,7 @@ onBeforeUnmount(stopAutoScroll)
             :key="b.index"
             :data-i="b.index"
             data-clickable
-            class="flex gap-3 px-4 py-2 border-b border-border/40 text-sm hover:bg-accent/30 transition-colors relative"
+            class="flex gap-2 px-3 py-1.5 border-b border-border/40 text-sm hover:bg-accent/30 transition-colors relative select-none"
             :class="[
               b.index >= startIdx && b.index <= endIdx ? 'bg-primary/10' : '',
               b.index === startIdx ? 'border-l-4 border-l-success' : '',
@@ -395,21 +394,21 @@ onBeforeUnmount(stopAutoScroll)
           </div>
         </div>
 
-        <div v-if="note" class="px-6 py-2 border-t bg-warning/5 flex items-center gap-2 text-sm text-warning">
-          <AlertTriangle class="size-4 shrink-0" />
+        <div v-if="note" class="px-4 py-1.5 border-t bg-warning/5 flex items-center gap-2 text-xs text-warning">
+          <AlertTriangle class="size-3.5 shrink-0" />
           <span>Chọn khối {{ startIdx }}–{{ endIdx }} ({{ endIdx - startIdx + 1 }} khối) — {{ note }}</span>
         </div>
-        <div v-else class="px-6 py-2 border-t bg-muted/20 flex items-center gap-2 text-sm text-muted-foreground">
-          <Info class="size-4 shrink-0" />
+        <div v-else class="px-4 py-1.5 border-t bg-muted/20 flex items-center gap-2 text-xs text-muted-foreground">
+          <Info class="size-3.5 shrink-0" />
           <span>Chọn khối {{ startIdx }}–{{ endIdx }} ({{ endIdx - startIdx + 1 }} khối)</span>
         </div>
       </template>
 
-      <DialogFooter class="px-6 py-3 border-t">
-        <Button variant="outline" @click="emit('update:open', false)">Hủy</Button>
-        <Button :disabled="saving || !data" @click="save">
-          <Loader2 v-if="saving" class="size-4 mr-2 animate-spin" />
-          <Scissors v-else class="size-4 mr-2" />
+      <DialogFooter class="px-3 py-1.5 border-t gap-2 sm:gap-2">
+        <Button variant="outline" size="sm" class="h-8" @click="emit('update:open', false)">Hủy</Button>
+        <Button size="sm" class="h-8" :disabled="saving || !data" @click="save">
+          <Loader2 v-if="saving" class="size-3.5 mr-1.5 animate-spin" />
+          <Scissors v-else class="size-3.5 mr-1.5" />
           Cắt &amp; lưu
         </Button>
       </DialogFooter>
